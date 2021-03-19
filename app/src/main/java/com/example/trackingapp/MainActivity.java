@@ -19,8 +19,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void disable (View v){
-        findViewById(R.id.clickbutton).setEnabled(false);
-        ((Button)findViewById(R.id.clickbutton)).setText("Tracking...");
+        findViewById(R.id.trackitbutton).setEnabled(false);
+        ((Button)findViewById(R.id.trackitbutton)).setText("Tracking...");
 
     }
 
