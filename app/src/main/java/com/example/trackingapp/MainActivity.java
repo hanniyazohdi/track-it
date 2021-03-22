@@ -3,15 +3,31 @@ package com.example.trackingapp;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.content.Intent;
+
+import com.example.trackingapp.ui.dashboard.SplashActivity;
+
 
 public class MainActivity extends AppCompatActivity {
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        startActivity(new Intent(MainActivity.this, SplashActivity.class));
+        finish();
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         Log.d( "Life Cycle Event: ", "In onCreate");
+    }
+
+    public void disable (View v){
+        findViewById(R.id.trackitbutton).setEnabled(false);
+        ((Button)findViewById(R.id.trackitbutton)).setText("Tracking...");
+
     }
 
     @Override
