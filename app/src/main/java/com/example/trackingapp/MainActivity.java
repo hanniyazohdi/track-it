@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     Button track;
     EditText postalcarrier, trackingnumber;
+    TextView carriertext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,55 +42,56 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         Log.d( "Life Cycle Event: ", "In onCreate");
 
-        // button declarations
-        track = findViewById(R.id.trackitbutton);
 
-        // text input declarations
+        final TrackingService trackingservice = new TrackingService(MainActivity.this);
+
+        // object declarations
+        track = findViewById(R.id.trackitbutton);
         postalcarrier = findViewById(R.id.postalcarrier);
         trackingnumber = findViewById(R.id.trackingnumber);
+        carriertext = (TextView) findViewById(R.id.carriertext);
+
+        // button event listener
+//        track.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View view){
+//
+//                trackingservice.getCarrier(postalcarrier.getText().toString(), new TrackingService.VolleyResponseListener() {
+//                    @Override
+//                    public void onError(String message) {
+//                        Toast.makeText(MainActivity.this, "Something is wrong", Toast.LENGTH_SHORT).show();
+//                    }
+//
+//                    @Override
+//                    public void onResponse(String carrierName) {
+//                        Toast.makeText(MainActivity.this, "Returned location: " + carrierName, Toast.LENGTH_SHORT).show();
+//                        // carriertext.setText(carrierName);
+//                    }
+//                });
+//
+//            }
+//        });
+
 
         // button event listener
         track.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
 
-                // VOLLEY HTTP REQUEST
-
-                // Instantiate the RequestQueue.
-                RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
-
-                String url ="https://www.metaweather.com/api/location/search/?query=" + postalcarrier.getText().toString();
-
-                // String url ="http://shipit-api.herokuapp.com/api/carriers/" + postalcarrier.getText().toString() + "/" + trackingnumber.getText().toString();
-
-                JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-
+                trackingservice.getStatus(postalcarrier.getText().toString(), new TrackingService.StatusResponse() {
                     @Override
-                    public void onResponse(JSONArray response) {
-                        String location = "";
-
-                        try {
-                            JSONObject packageInfo = response.getJSONObject(0);
-                            location = packageInfo.getString("location");
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        Toast.makeText(MainActivity.this, "Location = " + title, Toast.LENGTH_SHORT).show();
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(MainActivity.this, "Something wrong", Toast.LENGTH_SHORT).show();
+                    public void onError(String message) {
+                        Toast.makeText(MainActivity.this,"Something wrong!", Toast.LENGTH_SHORT).show();
                     }
 
+                    @Override
+                    public void onResponse(TrackingStatusModel trackingStatusModel) {
+                        Toast.makeText(MainActivity.this, trackingStatusModel.toString(), Toast.LENGTH_SHORT).show();
+                    }
                 });
 
-                queue.add(request);
-
             }
+
         });
 
     }
