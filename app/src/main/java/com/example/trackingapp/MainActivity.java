@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.content.Intent;
 import android.widget.EditText;
@@ -31,7 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
     Button track;
     EditText postalcarrier, trackingnumber;
-    TextView carriertext;
+    TextView carrierText1, details1, carrierText2, details2;
+    View locationicon, locationicon2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,91 +46,56 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         Log.d( "Life Cycle Event: ", "In onCreate");
 
-
-        // final TrackingService trackingservice = new TrackingService(MainActivity.this);
-
         // object declarations
         track = findViewById(R.id.trackitbutton);
+        // input boxes
         postalcarrier = findViewById(R.id.postalcarrier);
         trackingnumber = findViewById(R.id.trackingnumber);
-        carriertext = (TextView) findViewById(R.id.carriertext);
 
+        // output text first box
+        details1 = (TextView) findViewById(R.id.details1);
+        carrierText1 = (TextView) findViewById(R.id.carrierText1);
+        locationicon = (View) findViewById(R.id.locationicon);
 
+        // output text second box
+        details2 = (TextView) findViewById(R.id.details2);
+        carrierText2 = (TextView) findViewById(R.id.carrierText2);
+        locationicon2 = (View) findViewById(R.id.locationicon2);
+
+        final TrackingService trackingservice = new TrackingService(MainActivity.this);
+
+        // button event listener
         track.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
 
-                RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
-                // String url = "https://www.metaweather.com/api/location/search/?query=london";
-                String url = "http://shipit-api.herokuapp.com/api/carriers/fedex/784296727591";
-
-                JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                trackingservice.packageDetails(details1, carrierText1, locationicon,
+                        details2, carrierText2, locationicon2,
+                        postalcarrier.getText().toString(), trackingnumber.getText().toString(),
+                        new TrackingService.VolleyResponseListener() {
                     @Override
-                    public void onResponse(JSONObject response) {
-
-                        String carrier = "";
-                        try{
-
-                             JSONObject carrierName = response.getJSONObject("service");
-                             carrier = String.valueOf(carrierName);
-
-                            VolleyLog.e("", carrier);
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        Toast.makeText(MainActivity.this, carrier, Toast.LENGTH_SHORT).show();
+                    public void onError(String message) {
+                        Toast.makeText(MainActivity.this, "Something is wrong", Toast.LENGTH_SHORT).show();
                     }
 
-                }, new Response.ErrorListener(){
-
                     @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(MainActivity.this, "Error!", Toast.LENGTH_SHORT).show();
+                    public void onResponse(String packageDetails) {
 
-                        VolleyLog.e("Error: ", error.toString());
-                        VolleyLog.e("Error: ", error.getMessage());
-
+                        postalcarrier.setText("");
+                        trackingnumber.setText("");
                     }
                 });
-
-                queue.add(request);
 
             }
         });
 
 
-
-
         // button event listener
 //        track.setOnClickListener(new View.OnClickListener(){
 //            @Override
 //            public void onClick(View view){
 //
-//                trackingservice.getCarrier(postalcarrier.getText().toString(), new TrackingService.VolleyResponseListener() {
-//                    @Override
-//                    public void onError(String message) {
-//                        Toast.makeText(MainActivity.this, "Something is wrong", Toast.LENGTH_SHORT).show();
-//                    }
-//
-//                    @Override
-//                    public void onResponse(String carrierName) {
-//                        Toast.makeText(MainActivity.this, "Returned location: " + carrierName, Toast.LENGTH_SHORT).show();
-//                        // carriertext.setText(carrierName);
-//                    }
-//                });
-//
-//            }
-//        });
-
-
-        // button event listener
-//        track.setOnClickListener(new View.OnClickListener(){
-//            @Override
-//            public void onClick(View view){
-//
-//                trackingservice.getCarrier(postalcarrier.getText().toString(), new TrackingService.StatusResponse() {
+//                trackingservice.getLastDetail(postalcarrier.getText().toString(), trackingnumber.getText().toString(), new TrackingService.StatusResponse() {
 //                    @Override
 //                    public void onError(String message) {
 //                        Toast.makeText(MainActivity.this,"Something wrong!", Toast.LENGTH_SHORT).show();
@@ -143,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //
 //        });
-//
+
    }
 
 

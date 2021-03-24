@@ -9,8 +9,12 @@
 
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="367dp"
+        android:layout_height="480dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="153dp"
+        android:layout_marginBottom="98dp"
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/img_4147" />
 </RelativeLayout>

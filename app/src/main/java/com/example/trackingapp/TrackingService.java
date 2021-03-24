@@ -1,6 +1,9 @@
 package com.example.trackingapp;
 
 import android.content.Context;
+import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -13,18 +16,18 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TrackingService {
 
-    public static final String QUERY_FOR_CARRIER = "https://www.metaweather.com/api/location/search/?query=";
-    // public static final String QUERY_FOR_STATUS = "https://www.metaweather.com/api/location/";
+    public static final String QUERY_FOR_CARRIER = "http://shipit-api.herokuapp.com/api/carriers/";
 
     Context context;
-    String location;
-
+    String details, carrier;
     public TrackingService(Context context) {
         this.context = context;
     }
@@ -32,27 +35,45 @@ public class TrackingService {
     // callback to schedule a method call to occur when another method finishes
     public interface VolleyResponseListener{
         void onError(String message);
-        void onResponse(String carrierName);
+        void onResponse(String packageDetails);
     }
 
-    public void getCarrier(String carrierName, VolleyResponseListener volleyResponseListener){
+    public void packageDetails(TextView details1, TextView carrierText1, View locationicon,
+                               TextView details2, TextView carrierText2, View locationicon2,
+                               String carrierName, String trackingNumber, VolleyResponseListener volleyResponseListener){
 
-        String url = "https://www.metaweather.com/api/location/search/?query=" + carrierName;
-        // String url ="http://shipit-api.herokuapp.com/api/carriers/" + postalcarrier.getText().toString() + "/" + trackingnumber.getText().toString();
-
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+        String url = QUERY_FOR_CARRIER + carrierName + "/" + trackingNumber;
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
             @Override
-            public void onResponse(JSONArray response) {
-
+            public void onResponse(JSONObject response) {
+                details = "";
+                carrier = "";
                 try {
-                    JSONObject packageInfo = response.getJSONObject(0);
-                    location = packageInfo.getString("location_type");
+
+                    JSONArray arr = response.getJSONArray("activities");
+                    JSONObject latestDetail = arr.getJSONObject(0);
+                    details = latestDetail.getString("details");
+                    carrier = response.getString("service");
+
+                    if(details1.getText().toString().equals("") && carrierText1.getText().toString().equals("")){
+                        locationicon.setVisibility(View.VISIBLE);
+                        details1.setText(details);
+                        carrierText1.setText(carrier);
+
+                    }else if(details2.getText().toString().equals("") && carrierText2.getText().toString().equals("")){
+                        locationicon2.setVisibility(View.VISIBLE);
+                        details2.setText(details);
+                        carrierText2.setText(carrier);
+                    }
+
+                    Log.d("Carrier ", carrier);
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
-                volleyResponseListener.onResponse(location);
+                volleyResponseListener.onResponse(details);
 
             }
         }, new Response.ErrorListener() {
@@ -61,75 +82,9 @@ public class TrackingService {
             public void onErrorResponse(VolleyError error) {
                 volleyResponseListener.onError("ERROR!");
             }
-
         });
         MySingleton.getInstance(context).addToRequestQueue(request);
-
     }
-
-
-    // callback to schedule a method call to occur when another method finishes
-    public interface StatusResponse{
-        void onError(String message);
-        void onResponse(TrackingStatusModel trackingStatusModel);
-    }
-
-//    public void getStatus(String carrierName, StatusResponse statusResponse){
-//
-//        List<TrackingStatusModel> status = new ArrayList<>();
-//        String url = QUERY_FOR_STATUS + carrierName;
-//
-//        // get the json object
-//        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-//
-//            @Override
-//            public void onResponse(JSONObject response) {
-//                // Toast.makeText(context, response.toString(), Toast.LENGTH_SHORT).show();
-//
-//                try {
-//                    JSONArray consolidated_weather_list = response.getJSONArray("consolidated_weather");
-//
-//                    // get the first item in the tracking model
-//                    TrackingStatusModel first_day = new TrackingStatusModel();
-//                    JSONObject first_day_from_api = (JSONObject) consolidated_weather_list.get(0);
-//
-//                    first_day.setId(first_day_from_api.getInt("id"));
-//                    first_day.setWeather_state_name(first_day_from_api.getString("weather_state_name"));
-//                    first_day.setWeather_state_abbr(first_day_from_api.getString("weather_state_abbr"));
-//                    first_day.setWind_direction_compass(first_day_from_api.getString("wind_direction_compass"));
-//                    first_day.setCreated(first_day_from_api.getString("applicable_date"));
-//                    first_day.setMin_temp(first_day_from_api.getLong("min_temp"));
-//                    first_day.setMax_temp(first_day_from_api.getLong("max_temp"));
-//                    first_day.setThe_temp(first_day_from_api.getLong("the_temp"));
-//                    first_day.setMin_temp(first_day_from_api.getLong("min_temp"));
-//                    first_day.setWind_speed(first_day_from_api.getLong("wind_speed"));
-//                    first_day.setWind_direction(first_day_from_api.getLong("wind_direction"));
-//                    first_day.setAir_pressure(first_day_from_api.getInt("air_pressure"));
-//                    first_day.setHumidity(first_day_from_api.getInt("humidity"));
-//                    first_day.setVisibility(first_day_from_api.getLong("visibility"));
-//                    first_day.setPredictability(first_day_from_api.getInt("predictability"));
-//
-//                    statusResponse.onResponse(first_day);
-//
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }, new Response.ErrorListener() {
-//
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//
-//            }
-//        });
-//
-//        // get the property called "consolodated_weather" which is an array
-//
-//
-//        // get each item in the array
-//
-//        MySingleton.getInstance(context).addToRequestQueue(request);
-//    }
 
 
 }
